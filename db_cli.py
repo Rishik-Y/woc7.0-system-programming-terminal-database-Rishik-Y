@@ -1,6 +1,9 @@
 import argparse
 import os
 
+# Global variable to store the currently selected database
+current_db = None
+
 class Database:
     def __init__(self, name):
         self.name = name
@@ -28,8 +31,21 @@ class Database:
         else:
             print("The 'databases' folder does not exist.")
 
+    @staticmethod
+    def switch_db(db_name):
+        global current_db
+
+        # Check if the database exists
+        if os.path.exists(f"databases/{db_name}"):
+            current_db = db_name
+            print(f"Switched to database: {current_db}")
+        else:
+            print(f"Database '{db_name}' does not exist.")
+
 
 def main():
+    global current_db
+
     parser = argparse.ArgumentParser(description="Key-Value Database CLI")
 
     # Add subparsers to handle different commands
@@ -42,6 +58,10 @@ def main():
     # Command: list-db
     subparsers.add_parser('list-db', help="List all available databases")
 
+    # Command: switch-db
+    switch_db_parser = subparsers.add_parser('switch-db', help="Switch to a specific database")
+    switch_db_parser.add_argument('name', type=str, help="Name of the database to switch to")
+
     # Parse the arguments
     args = parser.parse_args()
 
@@ -51,6 +71,14 @@ def main():
         db.create()
     elif args.command == 'list-db':
         Database.list_all()
+    elif args.command == 'switch-db':
+        Database.switch_db(args.name)
+
+    # Show the current database (if any)
+    if current_db:
+        print(f"Currently working in database: {current_db}")
+    else:
+        print("No database selected.")
 
 if __name__ == "__main__":
     main()
