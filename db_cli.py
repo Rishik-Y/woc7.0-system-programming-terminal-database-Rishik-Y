@@ -66,6 +66,34 @@ class Database:
         
         print(f"Table '{table_name}' created successfully in the '{current_db}' database.")
 
+    @staticmethod
+    def list_tables():
+        global current_db
+
+        if current_db is None:
+            print("No database selected. Please switch to a database first.")
+            return
+
+        # Path to the database folder
+        db_path = f"databases/{current_db}"
+
+        # Check if the database folder exists
+        if not os.path.exists(db_path):
+            print(f"Database '{current_db}' does not exist.")
+            return
+
+        # List all files in the current database folder
+        tables = [f for f in os.listdir(db_path) if f.endswith('.json')]
+
+        # If no tables are found
+        if not tables:
+            print(f"No tables found in database '{current_db}'.")
+        else:
+            print(f"Tables in '{current_db}' database:")
+            for table in tables:
+                # Remove the .json extension to display the table name
+                print(f"- {table[:-5]}")  # Removing the ".json" extension
+
 # Function to load the currently selected database from the file
 def load_current_db():
     global current_db
@@ -102,6 +130,9 @@ def main():
     create_table_parser = subparsers.add_parser('create-table', help="Create a new table in the current database")
     create_table_parser.add_argument('name', type=str, help="Name of the table to create")
 
+    # Command: list-tables
+    subparsers.add_parser('list-tables', help="List all tables in the current database")
+
     # Parse the arguments
     args = parser.parse_args()
 
@@ -115,6 +146,8 @@ def main():
         Database.switch_db(args.name)
     elif args.command == 'create-table':
         Database.create_table(args.name)
+    elif args.command == 'list-tables':
+        Database.list_tables()
 
     # Show the current database (if any)
     if current_db:
