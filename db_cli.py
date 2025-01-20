@@ -4,6 +4,7 @@ import json
 
 # Global variable to store the currently selected database
 current_db = None
+CURRENT_DB_FILE = 'current_db.txt'
 
 class Database:
     def __init__(self, name):
@@ -39,6 +40,8 @@ class Database:
         # Check if the database exists
         if os.path.exists(f"databases/{db_name}"):
             current_db = db_name
+            with open(CURRENT_DB_FILE, 'w') as f:
+                f.write(current_db)  # Save the selected database to the file
             print(f"Switched to database: {current_db}")
         else:
             print(f"Database '{db_name}' does not exist.")
@@ -63,9 +66,21 @@ class Database:
         
         print(f"Table '{table_name}' created successfully in the '{current_db}' database.")
 
+# Function to load the currently selected database from the file
+def load_current_db():
+    global current_db
+    if os.path.exists(CURRENT_DB_FILE):
+        with open(CURRENT_DB_FILE, 'r') as f:
+            current_db = f.read().strip()  # Load the current database name
+            print(f"current_db is: {current_db}")
+    else:
+        current_db = None
 
 def main():
     global current_db
+
+    # Load the current database when the program starts
+    load_current_db()
 
     parser = argparse.ArgumentParser(description="Key-Value Database CLI")
 
