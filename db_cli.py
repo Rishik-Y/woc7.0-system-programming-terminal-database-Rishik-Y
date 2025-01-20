@@ -1,5 +1,6 @@
 import argparse
 import os
+import json
 
 # Global variable to store the currently selected database
 current_db = None
@@ -42,6 +43,26 @@ class Database:
         else:
             print(f"Database '{db_name}' does not exist.")
 
+    @staticmethod
+    def create_table(table_name):
+        global current_db
+
+        if current_db is None:
+            print("No database selected. Please switch to a database first.")
+            return
+
+        # Check if table already exists
+        table_path = f"databases/{current_db}/{table_name}.json"
+        if os.path.exists(table_path):
+            print(f"Table '{table_name}' already exists in the '{current_db}' database.")
+            return
+
+        # Create a new empty table (JSON file)
+        with open(table_path, 'w') as table_file:
+            json.dump({}, table_file)  # Initialize with an empty dictionary (key-value store)
+        
+        print(f"Table '{table_name}' created successfully in the '{current_db}' database.")
+
 
 def main():
     global current_db
@@ -62,6 +83,10 @@ def main():
     switch_db_parser = subparsers.add_parser('switch-db', help="Switch to a specific database")
     switch_db_parser.add_argument('name', type=str, help="Name of the database to switch to")
 
+    # Command: create-table
+    create_table_parser = subparsers.add_parser('create-table', help="Create a new table in the current database")
+    create_table_parser.add_argument('name', type=str, help="Name of the table to create")
+
     # Parse the arguments
     args = parser.parse_args()
 
@@ -73,6 +98,8 @@ def main():
         Database.list_all()
     elif args.command == 'switch-db':
         Database.switch_db(args.name)
+    elif args.command == 'create-table':
+        Database.create_table(args.name)
 
     # Show the current database (if any)
     if current_db:
